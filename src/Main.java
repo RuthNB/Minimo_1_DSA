@@ -52,7 +52,7 @@ public class Main {
         //Log4j initialization with proper configuration
         //PropertiesConfigurator is used to configure logger from properties file
         //Configuring Log4j, location of the log4j.properties file and must always be inside the src folder
-        PropertyConfigurator.configure("src/main/resources/log4j.properties");
+        PropertyConfigurator.configure("src/resources/log4j.properties");
         logger.debug("Debug Test Message!");
         logger.info("Info Test Message!");
         logger.warn("Warning Test Message!");
