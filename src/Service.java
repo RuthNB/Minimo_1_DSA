@@ -18,47 +18,45 @@ import java.util.List;
 @Path("/Service")
 public class Service { // Nombre del archivo service
     static final Logger logger = Logger.getLogger(Service.class); // Nombre del archivo service
-    public Covid19Manager manager; //Cambiar nombre manager
-
+    public Manager manager; //Cambiar nombre manager
     //CREACIÓN ESTRUCTURAS DE LA IMPLEMENTACIÓN
-    List<Vacunado> listaVacunados;
-    List<Vacuna> listaVacunas;
+    List<Usuario> listaUsuarios;
+
 
     public Service(){
         PropertyConfigurator.configure("src/main/resources/log4j.properties");
-        this.manager = Covid19ManagerImpl.getInstance(); // Cambiar nombre manager
+        this.manager = ManagerImpl.getInstance(); // Cambiar nombre manager
 
         // INICIALIZAR ESTRUCTURAS DE LA IMPLEMENTACIÓN
-        listaVacunados=new LinkedList<Vacunado>();
-        listaVacunas=new LinkedList<Vacuna>();
+        listaUsuarios=new LinkedList<Usuario>();
 
         // CREACIÓN DE OBJETOS NECESARIOS
 
-        Vacuna Pfizer=new Vacuna("Pfizer",30);
-        Vacuna Moderna=new Vacuna("Moderna",10);
-        Vacuna Astrazeneca=new Vacuna("Astrazeneca",22);
+        Usuario Maria = new Usuario("Maria");
+        Usuario Ruth = new Usuario("Ruth");
+
 
         // COLOCACIÓN DE OBJETOS PREDETERMINADOS EN LAS LISTAS
-        listaVacunas.add(Pfizer);
-        listaVacunas.add(Moderna);
-        listaVacunas.add(Astrazeneca);
+        listaUsuarios.add(Maria);
+        listaUsuarios.add(Ruth);
+        PuntoInteresNuevo("Maria","puente");
     }
 
-    // VACUNAR
+    // AÑADIR USUARIO
     @PUT
-    @ApiOperation(value = "Vacunar", notes = "Vacuna a un usuario")
+    @ApiOperation(value = "NuevoUsuario", notes = "Añade un usuario")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful"),
             @ApiResponse(code = 400, message = "Error"),
     })
-    @Path("/Vacunar/{usuario}/{vacuna}/{fecha}")
+    @Path("/NuevoUsuario/{nombreU}}")
     @Produces(MediaType.APPLICATION_JSON)
 
-    public Response Vacunar(@PathParam("usuario") String usuario,@PathParam("vacuna") Vacuna vacuna,@PathParam("fecha") Date fecha) {
+    public Response NuevoUsuario(@PathParam("nombreU") String usuario) {
         try {
-            manager.vacunar("usuario",vacuna,fecha);
-            Vacunado vacunado = new Vacunado(usuario,vacuna,fecha);
-            listaVacunados.add(vacunado);
+            manager.NuevoUsuario("usuario");
+            Usuario usuario1 = new Usuario(usuario);
+            listaUsuarios.add(usuario1);
             return Response.status(200).build();
         }
         catch(Error E){
@@ -66,38 +64,38 @@ public class Service { // Nombre del archivo service
         }
     }
 
-    // Lista de vacunaciones ordenadas por marca
+    // USUARIOS ORDENADOS
     @GET
-    @ApiOperation(value = "VacunacionesSegunMarca", notes = "Lista de vacunaciones ordenadas por marca y por fecha de vacunacion")
+    @ApiOperation(value = "usuariosOrdenados", notes = "Lista de usuarios ordenadados alfabeticamente")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful",response = Vacunado.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "Successful",response = Usuario.class, responseContainer = "List"),
             @ApiResponse(code = 400, message = "Error"),
     })
-    @Path("/VacunacionesSegunMarca")
+    @Path("/usuariosOrdenados")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response VacunacionesSegunMarca() {
+    public Response usuariosOrdenados() {
         try {
-            List<Vacunado> listaOrdenada = new LinkedList<Vacunado>();
-            listaOrdenada = manager.vacunacionesOrdenadasPorMarca(listaVacunados);
-            GenericEntity<List<Vacunado>> entity = new GenericEntity<List<Vacunado>>(listaOrdenada){};
+            List<Usuario> listaOrdenada = new LinkedList<Usuario>();
+            listaOrdenada = manager.usuariosOrdenados(listaUsuarios);
+            GenericEntity<List<Usuario>> entity = new GenericEntity<List<Usuario>>(listaOrdenada){};
             return Response.status(200).entity(entity).build();
         }catch(Error E){
             return Response.status(400).build();}}
 
-    // Lista de vacunas ordenadas segun el numero de vacunados
+
+    // INFO USUARIO
     @GET
-    @ApiOperation(value = "VacunasSegunVacunados", notes = "Lista de vacunass ordenadas segun numero de vacunados")
+    @ApiOperation(value = "InfoUsuario", notes = "Informacion de un usuario")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful",response = Vacuna.class, responseContainer = "List"),
+            @ApiResponse(code = 200, message = "Successful",response = Usuario.class, responseContainer = "List"),
             @ApiResponse(code = 400, message = "Error"),
     })
-    @Path("/VacunasSegunVacunados")
+    @Path("/InfoUsuario/{nombre}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response VacunasSegunVacunados() {
+    public Response InfoUsuario(@PathParam("nombre") String nombre) {
         try {
-            List<Vacuna> listaOrdenada = new LinkedList<Vacuna>();
-            listaOrdenada = manager.vacunasOrdenadasSegunCantidadVacunados(listaVacunas);
-            GenericEntity<List<Vacuna>> entity = new GenericEntity<List<Vacuna>>(listaOrdenada){};
+            Usuario usuario = manager.InfoUsuario(nombre);
+            GenericEntity entity = new GenericEntity(usuario){};
             return Response.status(200).entity(entity).build();
         }
         catch(Error E){
@@ -105,40 +103,19 @@ public class Service { // Nombre del archivo service
         }
     }
 
-    // Lista de seguimientos de un vacunado
-    @GET
-    @ApiOperation(value = "SeguimientoVacunado", notes = "Lista de seguimientos de un vacunado")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful",response = Seguimiento.class, responseContainer = "List"),
-            @ApiResponse(code = 400, message = "Error"),
-    })
-    @Path("/SeguimientoVacunado/{vacunado}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response SeguimientoVacunado(@PathParam("vacunado") String vacunado) {
-        try {
-            List<Seguimiento> listaOrdenada = new LinkedList<Seguimiento>();
-            listaOrdenada = manager.seguimientosDeUnVacunado(vacunado);
-            GenericEntity<List<Seguimiento>> entity = new GenericEntity<List<Seguimiento>>(listaOrdenada){};
-            return Response.status(200).entity(entity).build();
-        }
-        catch(Error E){
-            return Response.status(400).build();
-        }
-    }
-
-    // AÑADIR SEGUIMIENTO
+    // AÑADIR PUNTO DE INTERES A UN USUARIO
     @PUT
-    @ApiOperation(value = "AñadirSeguimiento", notes = "Añade un seguimiento a un usuario")
+    @ApiOperation(value = "PuntoInteresNuevo", notes = "Añade punto de interes a un usuario")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful"),
             @ApiResponse(code = 400, message = "Error"),
     })
-    @Path("/AñadirSeguimiento/{vacunado}/{fecha}/{estado}")
+    @Path("/PuntoInteresNuevo/{nombreU}/{nombrePI}")
     @Produces(MediaType.APPLICATION_JSON)
 
-    public Response Vacunar(@PathParam("vacunado") String usuario,@PathParam("fecha") Date fecha,@PathParam("estado") String estado) {
+    public Response PuntoInteresNuevo(@PathParam("nombreU") String usuario,@PathParam("nombrePI") String pi) {
         try {
-            manager.realizarSeguimineto("vacunado",fecha,"estado");
+            manager.PuntoInteresNuevo("nombreU","nombrePI");
             return Response.status(200).build();
         }
         catch(Error E){
@@ -146,9 +123,45 @@ public class Service { // Nombre del archivo service
         }
     }
 
+    // LISTA USUARIOS QUE HAN PASADO POR PI
+    @GET
+    @ApiOperation(value = "UsuariosQueHanPasadoPorPI", notes = "Lista de usuarios que han pasado por PI")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful",response = Usuario.class, responseContainer = "List"),
+            @ApiResponse(code = 400, message = "Error"),
+    })
+    @Path("/UsuariosQueHanPasadoPorPI/{nombrePI}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response UsuariosQueHanPasadoPorPI(@PathParam("nombrePI") String nombrePI) {
+        try {
+            List<Usuario> listaUsuariosQueHanPasado = new LinkedList<Usuario>();
+            listaUsuariosQueHanPasado = manager.UsuariosQueHanPasadoPorPI(listaUsuarios,"nombrePI");
+            GenericEntity<List<Usuario>> entity = new GenericEntity<List<Usuario>>(listaUsuariosQueHanPasado){};
+            return Response.status(200).entity(entity).build();
+        }
+        catch(Error E){
+            return Response.status(400).build();
+        }
+    }
 
-
-
-
-
+    // LISTA USUARIOS ORDENADA SEGUN NUMERO DE PI
+    @GET
+    @ApiOperation(value = "usuariosOrdenadosDescendentemente", notes = "Lista de usuarios ordenados segun numero de PI")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful",response = Usuario.class, responseContainer = "List"),
+            @ApiResponse(code = 400, message = "Error"),
+    })
+    @Path("/usuariosOrdenadosDescendentemente}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response UsuariosQueHanPasadoPorPI() {
+        try {
+            List<Usuario> listaUsuariosOrdenada = new LinkedList<Usuario>();
+            listaUsuariosOrdenada = manager.usuariosOrdenadosDescendentemente(listaUsuarios);
+            GenericEntity<List<Usuario>> entity = new GenericEntity<List<Usuario>>(listaUsuariosOrdenada){};
+            return Response.status(200).entity(entity).build();
+        }
+        catch(Error E){
+            return Response.status(400).build();
+        }
+    }
 }
