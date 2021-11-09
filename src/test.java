@@ -28,4 +28,6 @@ public class test {
         Covid19Manager.realizarSeguimineto("Pol",new Date (17/02/2021),"bien");
         logger.info("Se ha realizado el seguimiento correctamente");
     }
+    
+
 }
