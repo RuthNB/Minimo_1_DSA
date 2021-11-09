@@ -16,12 +16,12 @@ import java.util.List;
 
 @Api(value = "/service")
 @Path("/Service")
-public class Service { // Nombre del archivo service
-    static final Logger logger = Logger.getLogger(Service.class); // Nombre del archivo service
-    public Manager manager; //Cambiar nombre manager
+public class Service {
+    static final Logger logger = Logger.getLogger(Service.class);
+    public Manager manager;
+
     //CREACIÓN ESTRUCTURAS DE LA IMPLEMENTACIÓN
     List<Usuario> listaUsuarios;
-
 
     public Service(){
         PropertyConfigurator.configure("src/main/resources/log4j.properties");

@@ -13,7 +13,7 @@ public class test {
 
     @Before
     public void setUp(){
-        PropertyConfigurator.configure("src/main/resources/log4j.properties");
+        PropertyConfigurator.configure("src/resources/log4j.properties");
         Manager= (ManagerImpl) ManagerImpl.getInstance();
         Manager.listaUsuarios=new LinkedList<Usuario>();
         Usuario Maria = new Usuario("Maria");
